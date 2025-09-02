@@ -1,0 +1,348 @@
+.gka-wrap {
+    width: 200px;
+    height: 200px;
+}
+
+.animation {
+    width: 200px;
+    height: 200px;
+    background-image: url("./img/frame_00_delay-0.04s.png");
+    background-size: 200px 200px;
+    background-repeat: no-repeat;
+    animation-name: keyframes-ezgif-split;
+    animation-duration: 3.24s;
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: forwards;
+    animation-timing-function: steps(1);
+}
+
+@keyframes keyframes-ezgif-split {
+    0% {
+        width: 200px;
+        height: 200px;
+        background-image: url("./img/frame_00_delay-0.04s.png");
+        background-size: 200px 200px;
+    }
+
+    1.23% {
+        background-image: url("./img/frame_01_delay-0.04s.png");
+    }
+
+    2.47% {
+        background-image: url("./img/frame_02_delay-0.04s.png");
+    }
+
+    3.70% {
+        background-image: url("./img/frame_03_delay-0.04s.png");
+    }
+
+    4.94% {
+        background-image: url("./img/frame_04_delay-0.04s.png");
+    }
+
+    6.17% {
+        background-image: url("./img/frame_05_delay-0.04s.png");
+    }
+
+    7.41% {
+        background-image: url("./img/frame_06_delay-0.04s.png");
+    }
+
+    8.64% {
+        background-image: url("./img/frame_07_delay-0.04s.png");
+    }
+
+    9.88% {
+        background-image: url("./img/frame_08_delay-0.04s.png");
+    }
+
+    11.11% {
+        background-image: url("./img/frame_09_delay-0.04s.png");
+    }
+
+    12.35% {
+        background-image: url("./img/frame_10_delay-0.04s.png");
+    }
+
+    13.58% {
+        background-image: url("./img/frame_11_delay-0.04s.png");
+    }
+
+    14.81% {
+        background-image: url("./img/frame_12_delay-0.04s.png");
+    }
+
+    16.05% {
+        background-image: url("./img/frame_13_delay-0.04s.png");
+    }
+
+    17.28% {
+        background-image: url("./img/frame_14_delay-0.04s.png");
+    }
+
+    18.52% {
+        background-image: url("./img/frame_15_delay-0.04s.png");
+    }
+
+    19.75% {
+        background-image: url("./img/frame_16_delay-0.04s.png");
+    }
+
+    20.99% {
+        background-image: url("./img/frame_17_delay-0.04s.png");
+    }
+
+    22.22% {
+        background-image: url("./img/frame_18_delay-0.04s.png");
+    }
+
+    23.46% {
+        background-image: url("./img/frame_19_delay-0.04s.png");
+    }
+
+    24.69% {
+        background-image: url("./img/frame_20_delay-0.04s.png");
+    }
+
+    25.93% {
+        background-image: url("./img/frame_21_delay-0.04s.png");
+    }
+
+    27.16% {
+        background-image: url("./img/frame_22_delay-0.04s.png");
+    }
+
+    28.40% {
+        background-image: url("./img/frame_23_delay-0.04s.png");
+    }
+
+    29.63% {
+        background-image: url("./img/frame_24_delay-0.04s.png");
+    }
+
+    30.86% {
+        background-image: url("./img/frame_25_delay-0.04s.png");
+    }
+
+    32.10% {
+        background-image: url("./img/frame_26_delay-0.04s.png");
+    }
+
+    33.33% {
+        background-image: url("./img/frame_27_delay-0.04s.png");
+    }
+
+    34.57% {
+        background-image: url("./img/frame_28_delay-0.04s.png");
+    }
+
+    35.80% {
+        background-image: url("./img/frame_29_delay-0.04s.png");
+    }
+
+    37.04% {
+        background-image: url("./img/frame_30_delay-0.04s.png");
+    }
+
+    38.27% {
+        background-image: url("./img/frame_31_delay-0.04s.png");
+    }
+
+    39.51% {
+        background-image: url("./img/frame_32_delay-0.04s.png");
+    }
+
+    40.74% {
+        background-image: url("./img/frame_33_delay-0.04s.png");
+    }
+
+    41.98% {
+        background-image: url("./img/frame_34_delay-0.04s.png");
+    }
+
+    43.21% {
+        background-image: url("./img/frame_35_delay-0.04s.png");
+    }
+
+    44.44% {
+        background-image: url("./img/frame_36_delay-0.04s.png");
+    }
+
+    45.68% {
+        background-image: url("./img/frame_37_delay-0.04s.png");
+    }
+
+    46.91% {
+        background-image: url("./img/frame_38_delay-0.04s.png");
+    }
+
+    48.15% {
+        background-image: url("./img/frame_39_delay-0.04s.png");
+    }
+
+    49.38% {
+        background-image: url("./img/frame_40_delay-0.04s.png");
+    }
+
+    50.62% {
+        background-image: url("./img/frame_41_delay-0.04s.png");
+    }
+
+    51.85% {
+        background-image: url("./img/frame_42_delay-0.04s.png");
+    }
+
+    53.09% {
+        background-image: url("./img/frame_43_delay-0.04s.png");
+    }
+
+    54.32% {
+        background-image: url("./img/frame_44_delay-0.04s.png");
+    }
+
+    55.56% {
+        background-image: url("./img/frame_45_delay-0.04s.png");
+    }
+
+    56.79% {
+        background-image: url("./img/frame_46_delay-0.04s.png");
+    }
+
+    58.02% {
+        background-image: url("./img/frame_47_delay-0.04s.png");
+    }
+
+    59.26% {
+        background-image: url("./img/frame_48_delay-0.04s.png");
+    }
+
+    60.49% {
+        background-image: url("./img/frame_49_delay-0.04s.png");
+    }
+
+    61.73% {
+        background-image: url("./img/frame_50_delay-0.04s.png");
+    }
+
+    62.96% {
+        background-image: url("./img/frame_51_delay-0.04s.png");
+    }
+
+    64.20% {
+        background-image: url("./img/frame_52_delay-0.04s.png");
+    }
+
+    65.43% {
+        background-image: url("./img/frame_53_delay-0.04s.png");
+    }
+
+    66.67% {
+        background-image: url("./img/frame_54_delay-0.04s.png");
+    }
+
+    67.90% {
+        background-image: url("./img/frame_55_delay-0.04s.png");
+    }
+
+    69.14% {
+        background-image: url("./img/frame_56_delay-0.04s.png");
+    }
+
+    70.37% {
+        background-image: url("./img/frame_57_delay-0.04s.png");
+    }
+
+    71.60% {
+        background-image: url("./img/frame_58_delay-0.04s.png");
+    }
+
+    72.84% {
+        background-image: url("./img/frame_59_delay-0.04s.png");
+    }
+
+    74.07% {
+        background-image: url("./img/frame_60_delay-0.04s.png");
+    }
+
+    75.31% {
+        background-image: url("./img/frame_61_delay-0.04s.png");
+    }
+
+    76.54% {
+        background-image: url("./img/frame_62_delay-0.04s.png");
+    }
+
+    77.78% {
+        background-image: url("./img/frame_63_delay-0.04s.png");
+    }
+
+    79.01% {
+        background-image: url("./img/frame_64_delay-0.04s.png");
+    }
+
+    80.25% {
+        background-image: url("./img/frame_65_delay-0.04s.png");
+    }
+
+    81.48% {
+        background-image: url("./img/frame_66_delay-0.04s.png");
+    }
+
+    82.72% {
+        background-image: url("./img/frame_67_delay-0.04s.png");
+    }
+
+    83.95% {
+        background-image: url("./img/frame_68_delay-0.04s.png");
+    }
+
+    85.19% {
+        background-image: url("./img/frame_69_delay-0.04s.png");
+    }
+
+    86.42% {
+        background-image: url("./img/frame_70_delay-0.04s.png");
+    }
+
+    87.65% {
+        background-image: url("./img/frame_71_delay-0.04s.png");
+    }
+
+    88.89% {
+        background-image: url("./img/frame_72_delay-0.04s.png");
+    }
+
+    90.12% {
+        background-image: url("./img/frame_73_delay-0.04s.png");
+    }
+
+    91.36% {
+        background-image: url("./img/frame_74_delay-0.04s.png");
+    }
+
+    92.59% {
+        background-image: url("./img/frame_75_delay-0.04s.png");
+    }
+
+    93.83% {
+        background-image: url("./img/frame_76_delay-0.04s.png");
+    }
+
+    95.06% {
+        background-image: url("./img/frame_77_delay-0.04s.png");
+    }
+
+    96.30% {
+        background-image: url("./img/frame_78_delay-0.04s.png");
+    }
+
+    97.53% {
+        background-image: url("./img/frame_79_delay-0.04s.png");
+    }
+
+    98.77%,
+    100% {
+        background-image: url("./img/frame_80_delay-0.04s.png");
+    }
+}
