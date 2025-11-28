@@ -1,8 +1,3 @@
-這份更新後的 `README` 文件移除了「特色功能」區塊，並在開頭顯眼處標註了動畫素材來源，同時保留了 Gemini AI 的致謝。
-
-### File: README.md
-
-````markdown
 # osuJAM
 
 > **Note:** The current animation assets are courtesy of **[@nn161_9](https://x.com/nn161_9)**.
