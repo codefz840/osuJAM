@@ -2,7 +2,9 @@
 
 ![gif](gif.gif)
 
-> **Note:** The current animation assets are courtesy of **[@nn161_9](https://x.com/nn161_9)**.
+> The current animation assets are courtesy of **[@nn161_9](https://x.com/nn161_9)**.
+
+English | [中文](README-zh.md)
 
 **osuJAM** is a highly responsive, BPM-synchronized animation overlay for osu!, designed to run smoothly in OBS or any browser.
 

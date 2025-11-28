@@ -2,7 +2,9 @@
 
 ![gif](gif.gif)
 
-> **注意：** 目前使用的動畫素材來自 **[@nn161_9](https://x.com/nn161_9)**。
+> 目前使用的動畫素材來自 **[@nn161_9](https://x.com/nn161_9)**。
+
+[English](README.md) | 中文
 
 **osuJAM** 是一個專為 osu! 設計的高效能動畫同步遮罩 (Overlay)，可於 OBS 或瀏覽器中流暢運行。
 
