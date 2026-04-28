@@ -1,12 +1,31 @@
 // ==========================================
 // 1. 設定與全域變數
 // ==========================================
+
+// 【更換動畫時需修改此區塊】-------------------------------
+
+// 圖片檔名格式，% 會被替換成數字 (0, 1, 2, ...)
+// 例如 "gif-%.png" → 讀取 gif-0.png, gif-1.png, gif-2.png ...
+// 如果你的圖片命名為 frame-0.png, frame-1.png，請改成 "frame-%.png"
 const IMAGE_FORMAT = "gif-%.png";
+
+// 動畫的總幀數 (圖片總張數)
+// 必須與 ./images/ 資料夾中的實際圖片數量一致
+// 圖片編號從 0 開始，所以 81 代表 gif-0.png ~ gif-80.png 共 81 張
 const IMAGE_COUNT = 81;
-// 定義每拍的起始幀
+
+// 每一拍的起始幀編號陣列 (關鍵幀映射)
+// - 陣列長度 - 1 = 動畫的「拍數循環」 (目前為 10 拍一循環)
+// - 相鄰兩個值的差 = 該拍使用的幀數 (目前每拍 8 幀)
+// - 最後一個值必須等於 IMAGE_COUNT - 1 (即最後一張圖的索引)
+// 範例：4 拍循環、每拍 15 幀、共 60 張圖 → [0, 15, 30, 45, 60]
 const IMAGE_KEY = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80];
-// 每一拍播放的幀數 (固定為 8)
+
+// 每拍播放的幀數，僅用於 Debug 面板顯示「動畫 FPS」，不影響實際播放邏輯
+// 換素材時同步更新，讓 Debug 面板數字準確
 const FRAMES_PER_BEAT = 8; 
+
+// -------------------------------------------------------
 
 // 解析 URL Query 參數取得 Offset
 const urlParams = new URLSearchParams(window.location.search);
@@ -89,7 +108,8 @@ preLoadImages();
 // ==========================================
 // 3. WebSocket 連接
 // ==========================================
-
+// 透過 WebSocket 接收 Tosu/gosumemory 即時推送的 osu! 遊戲狀態
+// 包含目前播放時間、BPM、譜面資訊等
 function connectWebSocket() {
     const socket = new WebSocket("ws://127.0.0.1:24050/ws");
 
@@ -134,7 +154,8 @@ connectWebSocket();
 // ==========================================
 // 4. 動畫渲染循環
 // ==========================================
-
+// 每次螢幕刷新都會呼叫一次 (約 60fps 或更高)
+// 核心流程：計算目前播放時間 → 找到對應的 Timing Point → 算出幀索引 → 切換圖片
 function gameLoop() {
     const now = performance.now();
 
@@ -252,6 +273,8 @@ function parseOsuTimingPoints(osuFileContent) {
 // 6. 計算邏輯
 // ==========================================
 
+// 根據目前播放時間，找出對應的 Timing Point (紅線)
+// 回傳 current (目前生效的 TP) 與 next (下一個 TP，用於 Debug 顯示)
 function getTimingContext(currentTime) {
     if (!allTimingPoints || allTimingPoints.length === 0) {
         return { current: { time: 0, beatLength: 500 }, next: null };
@@ -276,6 +299,12 @@ function getTimingContext(currentTime) {
     return { current, next };
 }
 
+// 核心動畫計算：根據目前時間與 Timing Point，計算出應顯示第幾幀
+// 原理：
+//   1. 計算距離目前 TP 起點已過了幾拍 (totalBeats)
+//   2. 取整數部分決定在第幾「拍循環段」(currentSegmentIndex)
+//   3. 取小數部分決定在該段的播放進度 (beatProgress)
+//   4. 根據 IMAGE_KEY 插值計算出精確幀編號
 function calculateFrameIndex(currentTime, activeTP) {
     if (!activeTP) return 0;
 
@@ -296,6 +325,8 @@ function calculateFrameIndex(currentTime, activeTP) {
     return Math.floor(currentFrame);
 }
 
+// 將計算出的幀索引實際套用到 <img> 元素上
+// 只有在圖片來源真的改變時才更新，避免無謂的 DOM 操作
 function renderFrame(index) {
     if (index < 0) index = 0;
     if (index >= images.length) index = images.length - 1;
