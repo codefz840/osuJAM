@@ -47,6 +47,8 @@ Click on the window (or interact with the OBS Browser Source) to use hotkeys:
 | **`d`** | Toggle Debug    | Show/Hide the debug overlay (BPM, FPS, Offset).       |
 | **`+`** | Increase Offset | Adds **1ms** delay (Use if animation is too fast).    |
 | **`-`** | Decrease Offset | Removes **1ms** delay (Use if animation is too slow). |
+| **`[`** | Slower Snap     | Decrease snap divisor (e.g. 1/2 → 1/1).               |
+| **`]`** | Faster Snap     | Increase snap divisor (e.g. 1/1 → 1/2).               |
 
 ## ⚙️ Configuration
 
@@ -56,6 +58,8 @@ You can set a default offset directly in the URL to sync with your specific hard
 
 - `index.html?offset=50` (Delays animation by 50ms)
 - `index.html?offset=-20` (Advances animation by 20ms)
+- `index.html?snap=1` (Sets default snap divisor to 1/1)
+- `index.html?offset=50&snap=2` (Combines both)
 
 ### Code Configuration (`index.js`)
 
@@ -91,10 +95,16 @@ const IMAGE_FORMAT = "gif-%.png";
 // Set this to the total number of frames you have
 const IMAGE_COUNT = 81;
 
-// Define the starting frame index for each beat in the loop cycle
-// Rules:
-//   - Array length - 1 = how many beats per loop (currently 10 beats)
-//   - Difference between adjacent values = frames per beat (currently 8)
+// ★ Single-keyframe mode: IMAGE_KEY = [startFrame]
+//   Animation plays from startFrame through to the last frame, then loops.
+//   The beat resets it back to startFrame on every cycle.
+//   Use this when your animation is exactly one loop unit long.
+const IMAGE_KEY = [0];
+
+// ★ Multi-keyframe mode: IMAGE_KEY = [0, 8, 16, ...]
+//   Each value is the starting frame for that beat segment.
+//   - Array length - 1 = number of beats per loop
+//   - Difference between adjacent values = frames per beat
 //   - The LAST value must equal IMAGE_COUNT - 1
 const IMAGE_KEY = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80];
 
@@ -102,11 +112,24 @@ const IMAGE_KEY = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80];
 const FRAMES_PER_BEAT = 8;
 ```
 
+> **Snap speed** is controlled at runtime with `[` / `]` keys, or set via `?snap=N` URL parameter.
+>
+> - `1/1` = one loop segment per beat (default, recommended starting point)
+> - `1/2` = one segment per half-beat (2× faster)
+> - `1/4` = one segment per quarter-beat (4× faster)
+
 ### Step 3 — Calculate Your `IMAGE_KEY`
 
-Use this formula based on your animation:
+**Single-keyframe mode** — use `[startFrame]` when the whole animation is one loop:
 
-> **frames per beat** = total frames ÷ beats per loop cycle
+| Your Animation    | `IMAGE_COUNT` | `IMAGE_KEY` |
+| :---------------- | :-----------: | :---------- |
+| 10 frames, 1 loop |     `10`      | `[0]`       |
+| 81 frames, 1 loop |     `81`      | `[0]`       |
+
+**Multi-keyframe mode** — use when each beat maps to a specific frame range:
+
+> **frames per beat** = total frames ÷ beats per loop
 
 | Your Animation                   | `IMAGE_COUNT` | Beats per Loop | `IMAGE_KEY` Example                          |
 | :------------------------------- | :-----------: | :------------: | :------------------------------------------- |
@@ -115,7 +138,7 @@ Use this formula based on your animation:
 | 48 frames, 4-beat loop, 12f/beat |     `48`      |      `4`       | `[0, 12, 24, 36, 48]`                        |
 | 32 frames, 2-beat loop, 16f/beat |     `32`      |      `2`       | `[0, 16, 32]`                                |
 
-> **Note:** The last value in `IMAGE_KEY` must always equal `IMAGE_COUNT - 1` (the index of your last frame).
+> **Note (multi-keyframe):** The last value must always equal `IMAGE_COUNT - 1`.
 
 ## 📝 License
 

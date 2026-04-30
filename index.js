@@ -32,6 +32,16 @@ const urlParams = new URLSearchParams(window.location.search);
 let userOffset = parseInt(urlParams.get('offset')) || 0;
 console.log(`User Offset set to: ${userOffset}ms`);
 
+// 節拍細分設定：決定動畫循環速度
+// 1/1 = 每一拍一段 (循環段) → 基準速度
+// 1/2 = 每半拍一段 → 較快
+// 1/4 = 每 1/4 拍一段 → 更快
+// 可透過 URL 參數設定預設値，例如 index.html?snap=1
+const SNAP_OPTIONS = [1, 2, 3, 4, 6, 8];
+let snapDivisor = parseInt(urlParams.get('snap')) || 1;
+if (!SNAP_OPTIONS.includes(snapDivisor)) snapDivisor = 1;
+console.log(`Snap Divisor set to: 1/${snapDivisor}`);
+
 const images = [];          
 let allTimingPoints = [];   
 let currentImgElement = document.getElementById("jam"); 
@@ -75,6 +85,23 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "-" || e.key === "_" || e.key === "Subtract") {
         userOffset -= 1; 
         console.log(`Offset adjusted: ${userOffset}ms`);
+    }
+
+    // 3. 調整節拍細分 (按 [ 減小 / 按 ] 增大)
+    if (e.key === "[" || e.key === "{") {
+        const idx = SNAP_OPTIONS.indexOf(snapDivisor);
+        if (idx > 0) {
+            snapDivisor = SNAP_OPTIONS[idx - 1];
+            console.log(`Snap adjusted: 1/${snapDivisor}`);
+        }
+    }
+
+    if (e.key === "]" || e.key === "}") {
+        const idx = SNAP_OPTIONS.indexOf(snapDivisor);
+        if (idx < SNAP_OPTIONS.length - 1) {
+            snapDivisor = SNAP_OPTIONS[idx + 1];
+            console.log(`Snap adjusted: 1/${snapDivisor}`);
+        }
     }
 });
 
@@ -196,7 +223,7 @@ function gameLoop() {
             const calcBPM = realBPM > 0 ? realBPM : currentTPBPM;
 
             if (calcBPM > 0) {
-                frameInterval = (60000 / calcBPM) / FRAMES_PER_BEAT;
+                frameInterval = (60000 / calcBPM) / FRAMES_PER_BEAT / snapDivisor;
                 animFPS = 1000 / frameInterval;
             }
 
@@ -210,6 +237,7 @@ function gameLoop() {
 
             debugEl.innerHTML = `
                 Offset: <b>${userOffset}ms</b> (Press +/-)<br>
+                Snap: <b>1/${snapDivisor}</b> (Press [/])<br>
                 Time: <b>${Math.floor(displayTime)}</b> ms<br>
                 Render FPS: <b>${renderFPS}</b><br>
                 <br>
@@ -309,7 +337,20 @@ function calculateFrameIndex(currentTime, activeTP) {
     if (!activeTP) return 0;
 
     let timeDiff = currentTime - activeTP.time;
-    let totalBeats = timeDiff / activeTP.beatLength;
+    // 公式：snap=1 (1/1) = 每拍推進 1 單位 = 一拍一循環段（基準）
+    // snap=2 (1/2) = 每拍推進 2 單位 = 半拍一循環段（快）
+    let totalBeats = (timeDiff / activeTP.beatLength) * snapDivisor;
+
+    // ★ 單一關鍵幀模式：IMAGE_KEY 只有一個元素
+    // 在節拍點重設到起始幀，播放完所有剩餘幀 (IMAGE_COUNT - startFrame) 後循環
+    if (IMAGE_KEY.length === 1) {
+        const startFrame = IMAGE_KEY[0];
+        const totalFrames = IMAGE_COUNT - startFrame;
+        let progress = totalBeats % 1.0;
+        if (progress < 0) progress += 1.0;
+        return Math.floor(startFrame + totalFrames * progress);
+    }
+
     let totalSegments = IMAGE_KEY.length - 1; 
 
     let currentSegmentIndex = Math.floor(totalBeats) % totalSegments;
