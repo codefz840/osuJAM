@@ -13,7 +13,7 @@
         "title": "Image Count",
         "description": "Total number of frames. Must match the number of files in ./images/",
         "options": [],
-        "value": "81"
+        "value": "55"
     },
     {
         "uniqueID": "ImageKey",
@@ -21,7 +21,7 @@
         "title": "Image Key",
         "description": "Beat keyframe mapping (comma-separated). Single value = full loop mode. Multi-value = beat segment mode. e.g. \"0,8,16,24,32,40,48,56,64,72\"",
         "options": [],
-        "value": "0,8,16,24,32,40,48,56,64,72"
+        "value": "0,14,28,41,54"
     },
     {
         "uniqueID": "UserOffset",
