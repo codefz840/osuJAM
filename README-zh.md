@@ -51,22 +51,28 @@
 
 ## ⚙️ 進階設定
 
-### URL 參數
+### Tosu 設定面板
 
-你可以在網址後方加上參數來設定預設的延遲時間，以配合你的直播環境或硬體延遲。
+透過 Tosu 網頁介面 (`http://127.0.0.1:24050`) 進入 Overlays → miyabi-jam → Settings，即可即時調整以下設定：
 
-- `index.html?offset=50` (讓動畫延後 50ms)
-- `index.html?offset=-20` (讓動畫提早 20ms)
-- `index.html?snap=1` (設定預設 Snap 為 1/1)
-- `index.html?offset=50&snap=2` (同時設定兩者)
+| 設定 ID       | 類型 | 說明                                                       | 預設值                        |
+| :------------ | :--- | :--------------------------------------------------------- | :---------------------------- |
+| `ImageFormat` | 文字 | 圖片檔名格式，`%` 替換為幀數字。例如 `gif-%.png`           | `gif-%.png`                   |
+| `ImageCount`  | 數字 | 動畫總幀數，需與 `./images/` 內的實際圖片數量一致          | `81`                          |
+| `ImageKey`    | 文字 | 關鍵幀映射，以逗號分隔。例如 `0,8,16,24,32,40,48,56,64,72` | `0,8,16,24,32,40,48,56,64,72` |
+| `UserOffset`  | 數字 | 時間偏移 (ms)。正值 = 延後，負值 = 提前。也可用 +/- 快捷鍵 | `0`                           |
+| `SnapDivisor` | 數字 | 節拍細分 (1/2/3/4/6/8)。也可用 `[`/`]` 快捷鍵調整          | `1`                           |
 
-### 程式碼設定 (`index.js`)
+> `ImageFormat` 或 `ImageCount` 變更時，圖片會自動重新載入。
 
-你可以修改檔案頂部的常數來適配不同的素材：
+### 程式碼預設值 (`index.js`)
+
+若不使用設定面板，也可直接修改 `index.js` 頂部的預設值：
 
 ```javascript
-const IMAGE_COUNT = 81; // 圖片總張數
-const IMAGE_KEY = [...]; // 定義每一拍的起始關鍵幀 (Loop Mapping)
+let imageFormat = "gif-%.png"; // 圖片檔名格式
+let imageCount = 81;            // 圖片總張數
+let imageKey = [...];           // 關鍵幀映射
 ```
 
 ---
@@ -85,32 +91,27 @@ gif-0.png, gif-1.png, gif-2.png, ... gif-N.png
 
 將所有圖片放入 `./images/` 資料夾。
 
-### 步驟二 — 開啟 `index.js` 修改頂部常數
+### 步驟二 — 透過 Tosu 設定面板調整，或修改 `index.js` 預設值
+
+**方法一（推薦）**：啟動 Tosu 後，進入 Overlays → miyabi-jam → Settings 即時調整。
+
+**方法二**：直接修改 `index.js` 頂部的預設值：
 
 ```javascript
 // 修改成你的圖片命名格式，% 會被替換成數字
-const IMAGE_FORMAT = "gif-%.png";
+let imageFormat = "gif-%.png";
 
 // 設定為你的圖片總張數
-const IMAGE_COUNT = 81;
+let imageCount = 81;
 
-// ★ 單一關鍵幀模式：IMAGE_KEY = [起始幀]
-//   在節拍點重設到起始幀，然後一路播放到最後一幀再循環
-//   適合「整段動畫剛好一個循環單位」的素材
-const IMAGE_KEY = [0];
+// ★ 單一關鍵幀模式：[起始幀]
+let imageKey = [0];
 
-// ★ 多關鍵幀模式：IMAGE_KEY = [0, 8, 16, ...]
-//   每個值為該拍節段的起始幀編號
-//   - 陣列長度 - 1 = 幾拍一個循環
-//   - 相鄰兩幀的差 = 該拍使用幾幀
-//   - 最後一個必須等於 IMAGE_COUNT - 1
-const IMAGE_KEY = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80];
-
-// 每拍幀數，僅影響 Debug 面板的 FPS 顯示，不影響實際播放
-const FRAMES_PER_BEAT = 8;
+// ★ 多關鍵幀模式：[0, 8, 16, ...]
+let imageKey = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80];
 ```
 
-> **Snap 速度**可在執行時用 `[` / `]` 按鍵調整，或透過 `?snap=N` URL 參數設定。
+> **Snap 速度**可在執行時用 `[` / `]` 按鍵調整，或透過 Tosu 設定面板的 `SnapDivisor` 設定。
 >
 > - `1/1` = 每拍一個循環段（預設，建議從這裡開始調）
 > - `1/2` = 每半拍一段（2倍快）

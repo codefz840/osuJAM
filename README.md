@@ -52,22 +52,28 @@ Click on the window (or interact with the OBS Browser Source) to use hotkeys:
 
 ## ⚙️ Configuration
 
-### URL Parameters
+### Tosu Settings Panel
 
-You can set a default offset directly in the URL to sync with your specific hardware/setup latency.
+Open Tosu (`http://127.0.0.1:24050`), go to **Overlays → miyabi-jam → Settings** to adjust the following in real-time:
 
-- `index.html?offset=50` (Delays animation by 50ms)
-- `index.html?offset=-20` (Advances animation by 20ms)
-- `index.html?snap=1` (Sets default snap divisor to 1/1)
-- `index.html?offset=50&snap=2` (Combines both)
+| Setting ID    | Type   | Description                                                                                             | Default                       |
+| :------------ | :----- | :------------------------------------------------------------------------------------------------------ | :---------------------------- |
+| `ImageFormat` | text   | Frame filename pattern. `%` is replaced with the frame number.                                          | `gif-%.png`                   |
+| `ImageCount`  | number | Total number of frames. Must match the actual file count in `./images/`.                                | `81`                          |
+| `ImageKey`    | text   | Beat keyframe mapping, comma-separated. e.g. `0,8,16,24,32,40,48,56,64,72`                              | `0,8,16,24,32,40,48,56,64,72` |
+| `UserOffset`  | number | Timing offset in milliseconds. Positive = delay, Negative = advance. Also adjustable with `+`/`-` keys. | `0`                           |
+| `SnapDivisor` | number | Beat subdivision (1/2/3/4/6/8). Also adjustable with `[`/`]` keys.                                      | `1`                           |
 
-### Code Configuration (`index.js`)
+> Changing `ImageFormat` or `ImageCount` will automatically reload all images.
 
-You can modify the constants at the top of the file:
+### Code Defaults (`index.js`)
+
+You can also modify the default values directly at the top of `index.js`:
 
 ```javascript
-const IMAGE_COUNT = 81; // Total number of images
-const IMAGE_KEY = [...]; // Keyframe mapping for loop cycles
+let imageFormat = "gif-%.png"; // Frame filename pattern
+let imageCount = 81;            // Total frame count
+let imageKey = [...];           // Keyframe mapping
 ```
 
 ---
@@ -86,33 +92,27 @@ gif-0.png, gif-1.png, gif-2.png, ... gif-N.png
 
 Place all files inside the `./images/` folder.
 
-### Step 2 — Open `index.js` and Modify the Top Constants
+### Step 2 — Adjust via Tosu Settings Panel or modify `index.js` defaults
+
+**Option A (recommended)**: Open Tosu, go to Overlays → miyabi-jam → Settings and adjust in real-time.
+
+**Option B**: Directly edit the defaults at the top of `index.js`:
 
 ```javascript
 // Change to match your file naming pattern (% is replaced with the frame number)
-const IMAGE_FORMAT = "gif-%.png";
+let imageFormat = "gif-%.png";
 
 // Set this to the total number of frames you have
-const IMAGE_COUNT = 81;
+let imageCount = 81;
 
-// ★ Single-keyframe mode: IMAGE_KEY = [startFrame]
-//   Animation plays from startFrame through to the last frame, then loops.
-//   The beat resets it back to startFrame on every cycle.
-//   Use this when your animation is exactly one loop unit long.
-const IMAGE_KEY = [0];
+// ★ Single-keyframe mode: [startFrame]
+let imageKey = [0];
 
-// ★ Multi-keyframe mode: IMAGE_KEY = [0, 8, 16, ...]
-//   Each value is the starting frame for that beat segment.
-//   - Array length - 1 = number of beats per loop
-//   - Difference between adjacent values = frames per beat
-//   - The LAST value must equal IMAGE_COUNT - 1
-const IMAGE_KEY = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80];
-
-// Frames per beat — only affects the Debug panel FPS display, not actual playback
-const FRAMES_PER_BEAT = 8;
+// ★ Multi-keyframe mode: [0, 8, 16, ...]
+let imageKey = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80];
 ```
 
-> **Snap speed** is controlled at runtime with `[` / `]` keys, or set via `?snap=N` URL parameter.
+> **Snap speed** is controlled at runtime with `[` / `]` keys, or set via Tosu Settings Panel (`SnapDivisor`).
 >
 > - `1/1` = one loop segment per beat (default, recommended starting point)
 > - `1/2` = one segment per half-beat (2× faster)
