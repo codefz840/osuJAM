@@ -1,0 +1,7 @@
+Usecase: obs-overlay
+Name: osuJAM
+Version: 1.0.0
+Author: 840
+CompatibleWith: tosu
+authorLinks: https://github.com/codefz840/osuJAM
+Notes: catJAM for tosu

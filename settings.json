@@ -1,0 +1,42 @@
+[
+    {
+        "uniqueID": "ImageFormat",
+        "type": "text",
+        "title": "Image Format",
+        "description": "Frame filename pattern. % is replaced with the frame number. e.g. \"gif-%.png\"",
+        "options": [],
+        "value": "gif-%.png"
+    },
+    {
+        "uniqueID": "ImageCount",
+        "type": "number",
+        "title": "Image Count",
+        "description": "Total number of frames. Must match the number of files in ./images/",
+        "options": [],
+        "value": "81"
+    },
+    {
+        "uniqueID": "ImageKey",
+        "type": "text",
+        "title": "Image Key",
+        "description": "Beat keyframe mapping (comma-separated). Single value = full loop mode. Multi-value = beat segment mode. e.g. \"0,8,16,24,32,40,48,56,64,72\"",
+        "options": [],
+        "value": "0,8,16,24,32,40,48,56,64,72"
+    },
+    {
+        "uniqueID": "UserOffset",
+        "type": "number",
+        "title": "User Offset [ms]",
+        "description": "Animation timing offset in milliseconds. Positive = delay, Negative = advance. Can also be adjusted with +/- keys.",
+        "options": [],
+        "value": "0"
+    },
+    {
+        "uniqueID": "SnapDivisor",
+        "type": "number",
+        "title": "Snap Divisor",
+        "description": "Beat subdivision. Valid values: 1, 2, 3, 4, 6, 8. (1=1/1 beat, 2=1/2 beat, 4=1/4 beat, etc.) Can also be adjusted with [ / ] keys.",
+        "options": [],
+        "value": "1"
+    }
+]

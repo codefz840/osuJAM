@@ -2,45 +2,34 @@
 // 1. 設定與全域變數
 // ==========================================
 
-// 【更換動畫時需修改此區塊】-------------------------------
+// 【預設值 — 可透過 Tosu 設定面板即時調整】-----------------
 
 // 圖片檔名格式，% 會被替換成數字 (0, 1, 2, ...)
-// 例如 "gif-%.png" → 讀取 gif-0.png, gif-1.png, gif-2.png ...
-// 如果你的圖片命名為 frame-0.png, frame-1.png，請改成 "frame-%.png"
-const IMAGE_FORMAT = "gif-%.png";
+// 設定 ID: ImageFormat
+let imageFormat = "gif-%.png";
 
 // 動畫的總幀數 (圖片總張數)
-// 必須與 ./images/ 資料夾中的實際圖片數量一致
-// 圖片編號從 0 開始，所以 81 代表 gif-0.png ~ gif-80.png 共 81 張
-const IMAGE_COUNT = 55;
+// 設定 ID: ImageCount
+let imageCount = 81;
 
 // 每一拍的起始幀編號陣列 (關鍵幀映射)
-// - 陣列長度 - 1 = 動畫的「拍數循環」 (目前為 10 拍一循環)
-// - 相鄰兩個值的差 = 該拍使用的幀數 (目前每拍 8 幀)
-// - 最後一個值必須等於 IMAGE_COUNT - 1 (即最後一張圖的索引)
-// 範例：4 拍循環、每拍 15 幀、共 60 張圖 → [0, 15, 30, 45, 60]
-const IMAGE_KEY = [0, 14, 28, 41, 54];
-
-// 每拍播放的幀數，僅用於 Debug 面板顯示「動畫 FPS」，不影響實際播放邏輯
-// 換素材時同步更新，讓 Debug 面板數字準確
-const FRAMES_PER_BEAT = 8; 
+// ★ 單一元素模式：[0]  ★ 多元素模式：[0, 8, 16, ...]
+// 設定 ID: ImageKey (逗號分隔字串，例如 "0,8,16,24,32,40,48,56,64,72")
+let imageKey = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72];
 
 // -------------------------------------------------------
 
-// 解析 URL Query 參數取得 Offset
-const urlParams = new URLSearchParams(window.location.search);
-let userOffset = parseInt(urlParams.get('offset')) || 0;
-console.log(`User Offset set to: ${userOffset}ms`);
+// 時間偏移 (ms)，可透過 Tosu 設定面板或 +/- 快捷鍵調整
+// 設定 ID: UserOffset
+let userOffset = 0;
 
-// 節拍細分設定：決定動畫循環速度
+// 節拍細分設定：可透過 Tosu 設定面板或 [/] 快捷鍵調整
 // 1/1 = 每一拍一段 (循環段) → 基準速度
 // 1/2 = 每半拍一段 → 較快
 // 1/4 = 每 1/4 拍一段 → 更快
-// 可透過 URL 參數設定預設値，例如 index.html?snap=1
+// 設定 ID: SnapDivisor
 const SNAP_OPTIONS = [1, 2, 3, 4, 6, 8];
-let snapDivisor = parseInt(urlParams.get('snap')) || 1;
-if (!SNAP_OPTIONS.includes(snapDivisor)) snapDivisor = 1;
-console.log(`Snap Divisor set to: 1/${snapDivisor}`);
+let snapDivisor = 1;
 
 const images = [];          
 let allTimingPoints = [];   
@@ -121,34 +110,115 @@ let renderFPS = 0;
 // ==========================================
 // 2. 初始化與圖片預載
 // ==========================================
-function preLoadImages() {
-    console.log("開始預載圖片...");
-    for (let i = 0; i < IMAGE_COUNT; i++) {
+function reloadImages() {
+    images.length = 0;
+    for (let i = 0; i < imageCount; i++) {
         const image = new Image();
-        image.src = `./images/${IMAGE_FORMAT.replace("%", i)}`;
+        image.src = `./images/${imageFormat.replace("%", i)}`;
         images.push(image);
     }
     if (images.length > 0) renderFrame(0);
+    console.log(`圖片載入: ${imageCount} 張, 格式: ${imageFormat}`);
+}
+
+function preLoadImages() {
+    console.log("開始預載圖片...");
+    reloadImages();
 }
 preLoadImages();
 
 // ==========================================
-// 3. WebSocket 連接
+// 3. 設定管理 (Settings)
+// ==========================================
+// 接收並套用從 Tosu 設定面板傳入的設定值
+// ImageFormat / ImageCount / ImageKey 變更時會自動重新載入圖片
+function applySettings(msg) {
+    if (!msg || typeof msg !== 'object') return;
+    let needsReload = false;
+
+    if (msg.ImageFormat !== undefined) {
+        const fmt = String(msg.ImageFormat);
+        if (fmt !== imageFormat) { imageFormat = fmt; needsReload = true; }
+    }
+    if (msg.ImageCount !== undefined) {
+        const count = parseInt(msg.ImageCount);
+        if (!isNaN(count) && count > 0 && count !== imageCount) {
+            imageCount = count;
+            needsReload = true;
+        }
+    }
+    if (msg.ImageKey !== undefined) {
+        const parsed = String(msg.ImageKey)
+            .split(',')
+            .map(s => parseInt(s.trim()))
+            .filter(n => !isNaN(n));
+        if (parsed.length > 0) imageKey = parsed;
+    }
+    if (msg.UserOffset !== undefined) {
+        const offset = parseInt(msg.UserOffset);
+        if (!isNaN(offset)) userOffset = offset;
+    }
+    if (msg.SnapDivisor !== undefined) {
+        const snap = parseInt(msg.SnapDivisor);
+        if (SNAP_OPTIONS.includes(snap)) snapDivisor = snap;
+    }
+
+    if (needsReload) reloadImages();
+    console.log("設定已更新:", msg);
+}
+
+// ==========================================
+// 4. WebSocket 連接
 // ==========================================
 // 透過 WebSocket 接收 Tosu/gosumemory 即時推送的 osu! 遊戲狀態
 // 包含目前播放時間、BPM、譜面資訊等
-function connectWebSocket() {
-    const socket = new WebSocket("ws://127.0.0.1:24050/ws");
 
-    socket.onopen = () => console.log("WebSocket 已連接");
+// 設定用 WebSocket：連接 /websocket/commands 端點取得覆蓋層設定
+function fetchSettings() {
+    if (!window.COUNTER_PATH) return;
+    const socket = new WebSocket(
+        `ws://127.0.0.1:24050/websocket/commands?l=${window.COUNTER_PATH}`
+    );
+
+    socket.onopen = () => {
+        console.log("Settings WebSocket 已連接");
+        socket.send(`getSettings:${encodeURI(window.COUNTER_PATH)}`);
+    };
 
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+            if (data.command === "getSettings") {
+                applySettings(data.message);
+                socket.close();
+            }
+        } catch (err) {
+            console.error("Settings WS Error:", err);
+        }
+    };
+
+    socket.onerror = () => socket.close();
+}
+
+window.addEventListener("load", fetchSettings);
+
+// 遊戲狀態用 WebSocket：連接 /ws 端點接收即時遊戲資料
+function connectWebSocket() {
+    const socket = new WebSocket("ws://127.0.0.1:24050/ws");
+
+    socket.onopen = () => {
+        console.log("WebSocket 已連接");
+    };
+
+    socket.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+
+            if (!data?.menu?.bm) return;
             currentOsuData = data;
 
             // 1. 偵測切歌
-            const currentBeatmap = data?.menu?.bm?.path?.file;
+            const currentBeatmap = data.menu.bm.path?.file;
             if (currentBeatmap && currentBeatmap !== lastBeatmap) {
                 console.log("偵測到切歌:", currentBeatmap);
                 lastBeatmap = currentBeatmap;
@@ -179,7 +249,7 @@ function connectWebSocket() {
 connectWebSocket();
 
 // ==========================================
-// 4. 動畫渲染循環
+// 5. 動畫渲染循環
 // ==========================================
 // 每次螢幕刷新都會呼叫一次 (約 60fps 或更高)
 // 核心流程：計算目前播放時間 → 找到對應的 Timing Point → 算出幀索引 → 切換圖片
@@ -216,22 +286,6 @@ function gameLoop() {
             const currentTPBPM = Math.round(60000 / activeTP.beatLength);
             const baseBPM = commonBPM || currentTPBPM;
 
-            // --- 計算 動畫 FPS 與 時間間隔 ---
-            let animFPS = 0;
-            let frameInterval = 0;
-
-            const calcBPM = realBPM > 0 ? realBPM : currentTPBPM;
-
-            if (calcBPM > 0) {
-                frameInterval = (60000 / calcBPM) / FRAMES_PER_BEAT / snapDivisor;
-                animFPS = 1000 / frameInterval;
-            }
-
-            if (isPaused) {
-                animFPS = 0;
-                frameInterval = 0;
-            }
-
             const nextTPTime = nextTP ? Math.floor(nextTP.time) : "None";
             const nextTPBpm = nextTP ? Math.round(60000 / nextTP.beatLength) : "-";
 
@@ -242,7 +296,6 @@ function gameLoop() {
                 Render FPS: <b>${renderFPS}</b><br>
                 <br>
                 BPM: <b>${realBPM}</b> (Real) / <b>${baseBPM}</b> (Base)<br>
-                Anim FPS: <b>${animFPS.toFixed(1)}</b> (${frameInterval.toFixed(1)}ms)<br>
                 <br>
                 Current TP: Time <b>${Math.floor(activeTP.time)}</b> (Section BPM: ${currentTPBPM})<br>
                 Next TP: Time <b>${nextTPTime}</b> (BPM ${nextTPBpm})<br>
@@ -261,7 +314,7 @@ function gameLoop() {
 requestAnimationFrame(gameLoop);
 
 // ==========================================
-// 5. 檔案讀取 (維持不變)
+// 6. 檔案讀取 (維持不變)
 // ==========================================
 
 async function loadCurrentBeatmapFile() {
@@ -298,7 +351,7 @@ function parseOsuTimingPoints(osuFileContent) {
 }
 
 // ==========================================
-// 6. 計算邏輯
+// 7. 計算邏輯
 // ==========================================
 
 // 根據目前播放時間，找出對應的 Timing Point (紅線)
@@ -343,15 +396,15 @@ function calculateFrameIndex(currentTime, activeTP) {
 
     // ★ 單一關鍵幀模式：IMAGE_KEY 只有一個元素
     // 在節拍點重設到起始幀，播放完所有剩餘幀 (IMAGE_COUNT - startFrame) 後循環
-    if (IMAGE_KEY.length === 1) {
-        const startFrame = IMAGE_KEY[0];
-        const totalFrames = IMAGE_COUNT - startFrame;
+    if (imageKey.length === 1) {
+        const startFrame = imageKey[0];
+        const totalFrames = imageCount - startFrame;
         let progress = totalBeats % 1.0;
         if (progress < 0) progress += 1.0;
         return Math.floor(startFrame + totalFrames * progress);
     }
 
-    let totalSegments = IMAGE_KEY.length - 1; 
+    let totalSegments = imageKey.length - 1; 
 
     let currentSegmentIndex = Math.floor(totalBeats) % totalSegments;
     if (currentSegmentIndex < 0) currentSegmentIndex += totalSegments;
@@ -359,8 +412,8 @@ function calculateFrameIndex(currentTime, activeTP) {
     let beatProgress = totalBeats % 1.0;
     if (beatProgress < 0) beatProgress = 1.0 + beatProgress;
 
-    let startFrame = IMAGE_KEY[currentSegmentIndex];
-    let endFrame = IMAGE_KEY[currentSegmentIndex + 1];
+    let startFrame = imageKey[currentSegmentIndex];
+    let endFrame = imageKey[currentSegmentIndex + 1];
     let currentFrame = startFrame + (endFrame - startFrame) * beatProgress;
 
     return Math.floor(currentFrame);
