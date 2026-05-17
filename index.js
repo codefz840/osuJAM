@@ -172,29 +172,47 @@ function applySettings(msg) {
 // ==========================================
 // 透過 WebSocket 接收 Tosu/gosumemory 即時推送的 osu! 遊戲狀態
 // 包含目前播放時間、BPM、譜面資訊等
-// 注意：Tosu 需要先收到 getSettings 才會開始推送遊戲資料
-function connectWebSocket() {
-    const socket = new WebSocket("ws://127.0.0.1:24050/ws");
+
+// 設定用 WebSocket：連接 /websocket/commands 端點取得覆蓋層設定
+function fetchSettings() {
+    if (!window.COUNTER_PATH) return;
+    const socket = new WebSocket(
+        `ws://127.0.0.1:24050/websocket/commands?l=${window.COUNTER_PATH}`
+    );
 
     socket.onopen = () => {
-        console.log("WebSocket 已連接");
-        if (window.COUNTER_PATH) {
-            socket.send(JSON.stringify({
-                command: "getSettings",
-                message: encodeURI(window.COUNTER_PATH)
-            }));
-        }
+        console.log("Settings WebSocket 已連接");
+        socket.send(`getSettings:${encodeURI(window.COUNTER_PATH)}`);
     };
 
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-
-            // 處理設定回應，處理完後繼續監聽遊戲資料
             if (data.command === "getSettings") {
                 applySettings(data.message);
-                return;
+                socket.close();
             }
+        } catch (err) {
+            console.error("Settings WS Error:", err);
+        }
+    };
+
+    socket.onerror = () => socket.close();
+}
+
+window.addEventListener("load", fetchSettings);
+
+// 遊戲狀態用 WebSocket：連接 /ws 端點接收即時遊戲資料
+function connectWebSocket() {
+    const socket = new WebSocket("ws://127.0.0.1:24050/ws");
+
+    socket.onopen = () => {
+        console.log("WebSocket 已連接");
+    };
+
+    socket.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
 
             if (!data?.menu?.bm) return;
             currentOsuData = data;
